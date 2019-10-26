@@ -261,6 +261,7 @@ __pycache__/
 *.pyc
 
 # Projects ignore level
+.vscode
 bin
 obj
 *.db
