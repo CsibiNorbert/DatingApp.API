@@ -17,5 +17,6 @@ namespace DatingApp.API.Data
 
         // This is the entity in which we access the entity itself.
         public DbSet<Value> Values { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
