@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DatingApp.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.API.Data
 {
@@ -14,9 +15,22 @@ namespace DatingApp.API.Data
         {
             _context = context;
         }
-        public Task<User> Login(string username, string password)
+
+        public async Task<User> Login(string username, string password)
         {
-            throw new NotImplementedException();
+            var user = await _context.Users.FirstOrDefaultAsync(u=> u.Username == username);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            if (!VerifyHashPassword(password, user.HashPassword,user.SaltPassword))
+            {
+                return null;
+            }
+
+            return user;
         }
 
         public async Task<User> Register(User user, string password)
@@ -48,6 +62,23 @@ namespace DatingApp.API.Data
                 passwordSalt = hmac.Key; // This is used to decrypt the HASH generated for the password, it is called SALT
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password)); // This gives us the computed HASH for our password. The encoding statement means that it gives back the bytes from password
             }
+        }
+
+        private bool VerifyHashPassword(string password, byte[] hashPassword, byte[] saltPassword)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(saltPassword))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != hashPassword[i])
+                    {
+                        return false;
+                    }
+                }
+
+            }
+            return true;
         }
     }
 }
