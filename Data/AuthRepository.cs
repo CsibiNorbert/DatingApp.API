@@ -49,9 +49,14 @@ namespace DatingApp.API.Data
             return user;
         }
 
-        public Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string username)
         {
-            throw new NotImplementedException();
+            if (await _context.Users.AnyAsync(u=>u.Username == username))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         // We don't return anything here, we are setting the passwordHash & passwordSalt by using the out keyword.

@@ -34,6 +34,8 @@ namespace DatingApp.API
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            // Injecting the AuthRepo so that we can use it in the controllers
+            services.AddScoped<IAuthRepository, AuthRepository>();
             // Add CORS service.
             services.AddCors();
         }
