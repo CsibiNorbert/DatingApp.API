@@ -265,3 +265,4 @@ __pycache__/
 bin
 obj
 *.db
+appsettings.json
