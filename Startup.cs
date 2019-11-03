@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DatingApp.API.Data;
+using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +69,27 @@ namespace DatingApp.API
             }
             else
             {
+                // Adds a middleware for the exception handler
+                // Context relates to our http request/response
+                // This doesn`t require a try/catch block
+                app.UseExceptionHandler(builder => {
+                    builder.Run(async context =>
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+                        // This will store our error
+                        var error = context.Features.Get<IExceptionHandlerFeature>();
+
+                        if (error != null)
+                        {
+                            // This will add a new header into our response
+                            context.Response.AddApplicationError(error.Error.Message);
+
+                            // writing our error message to the http response
+                            await context.Response.WriteAsync(error.Error.Message);
+                        }
+                    });
+                });
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 // Security header. Use HTTPS if available.
                 // app.UseHsts();
