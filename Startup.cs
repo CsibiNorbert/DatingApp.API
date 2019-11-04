@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -51,6 +52,8 @@ namespace DatingApp.API
             // Add CORS service.
             services.AddCors();
 
+            // we need to give an assembly to where to look in
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
             // Add token scheme
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
