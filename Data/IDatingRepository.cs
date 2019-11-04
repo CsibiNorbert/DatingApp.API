@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DatingApp.API.Data
 {
-    interface IDatingRepository
+    public interface IDatingRepository
     {
         // Generic type of method,  we constrain the method for just classes
         // Adding user/ adding photo
