@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Helpers;
+using DatingApp.API.Helpers.CloudinarySettings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -51,6 +52,10 @@ namespace DatingApp.API
 
             // Add CORS service.
             services.AddCors();
+
+            // the values inside the json gile will be assigned to the class when we get the values
+            // They are going to match what is in the class
+            services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
 
             // we need to give an assembly to where to look in
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
