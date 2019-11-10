@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using AutoMapper;
 
 namespace DatingApp.API.Controllers
 {
@@ -20,12 +21,14 @@ namespace DatingApp.API.Controllers
     {
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
         // Injecting the IAuthRepository to the controller.
-        public AuthController(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthController(IAuthRepository authRepository, IConfiguration configuration, IMapper mapper)
         {
             _authRepository = authRepository;
             _configuration = configuration;
+            _mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -89,10 +92,15 @@ namespace DatingApp.API.Controllers
 
             var token = tokenhandler.CreateToken(tokenDescriptor);
             #endregion
+
+            // This is used to retrieve the main photo, we mapp to UserForListDto
+            var user = _mapper.Map<UserForListDto>(userFromRepo);
+
             return Ok(
                 new
                 {
-                    token = tokenhandler.WriteToken(token)
+                    token = tokenhandler.WriteToken(token),
+                    user
                 });
         }
     }

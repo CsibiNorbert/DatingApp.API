@@ -163,5 +163,55 @@ namespace DatingApp.API.Controllers
             // If above failed to save
             return BadRequest("Could not set photo to main");
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePhoto(int userId, int id)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _daringRepo.GetUser(userId);
+
+            // if the Id passing in, is not matching with any of the user photo collection
+            if (!user.Photos.Any(p => p.Id == id))
+            {
+                return Unauthorized();
+            }
+
+            // The selected photo to be main
+            var photoFromRepo = await _daringRepo.GetPhoto(id);
+
+            if (photoFromRepo.IsMain)
+            {
+                return BadRequest("You cannot delete your main photo");
+            }
+
+            if (photoFromRepo.PublicPhotoId != null)
+            {
+                // We need to delete photo from cloudinary and our reference in the DB
+                var deleteParams = new DeletionParams(photoFromRepo.PublicPhotoId);
+
+                var result = _cloudinary.Destroy(deleteParams);
+
+                if (result.Result == "ok")
+                {
+                    _daringRepo.Delete(photoFromRepo);
+                }
+            }
+            else
+            {
+                // Delete photo if photo is not from cloudinary
+                _daringRepo.Delete(photoFromRepo);
+            }
+
+            if (await _daringRepo.SaveAll())
+            {
+                return Ok();
+            }
+
+            return BadRequest("failed to delete the photo");
+        }
     }
 }
