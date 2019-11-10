@@ -111,6 +111,7 @@ namespace DatingApp.API
             // app.UseHttpsRedirection();
 
             // Configure the middlewear for CORS
+            // Allow credentials will fix the uploader issue, but this means that we send cookies without request
             app.UseCors(x=>x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
