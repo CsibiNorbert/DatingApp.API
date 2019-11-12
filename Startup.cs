@@ -57,6 +57,10 @@ namespace DatingApp.API
             // They are going to match what is in the class
             services.Configure<CloudinarySettings>(Configuration.GetSection("CloudinarySettings"));
 
+            // Scoped because we want to create new instance per request
+            // And we can make use of this in the user controller with ServiceFilter
+            services.AddScoped<LogUserActivity>();
+
             // we need to give an assembly to where to look in
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
             // Add token scheme
