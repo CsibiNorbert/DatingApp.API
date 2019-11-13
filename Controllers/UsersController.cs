@@ -28,13 +28,17 @@ namespace DatingApp.API.Controllers
             _mapper = mapper;
         }
 
+        // FromQuery will allow us to send an empty query string
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery] UserParams userParams)
         {
-            var users = await _datingrepo.GetUsers();
+            var users = await _datingrepo.GetUsers(userParams);
 
             // IEnumerable because we return a list of users
             var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
+
+            // We pass this information back in the header
+            Response.AddPagination(users.CurrentPage,users.PageSize,users.TotalCount,users.TotalPages);
 
             return Ok(usersToReturn);
         }

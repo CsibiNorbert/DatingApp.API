@@ -25,7 +25,7 @@ namespace DatingApp.API.Helpers
 
             var user = await repo.GetUser(userId);
 
-            user.LastActive = DateTime.UtcNow;
+            user.LastActive = DateTime.Now;
             await repo.SaveAll();
         }
     }

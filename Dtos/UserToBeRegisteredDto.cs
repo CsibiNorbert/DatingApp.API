@@ -29,8 +29,8 @@ namespace DatingApp.API.Dtos
         // we don`t provide this to our form, so we construct the values
         public UserToBeRegisteredDto()
         {
-            CreatedProfile = DateTime.UtcNow;
-            LastActive = DateTime.UtcNow;
+            CreatedProfile = DateTime.Now;
+            LastActive = DateTime.Now;
         }
     }
 }

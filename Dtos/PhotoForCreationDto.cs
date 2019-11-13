@@ -20,7 +20,7 @@ namespace DatingApp.API.Dtos
         // The reason is for adding the date time here
         public PhotoForCreationDto()
         {
-            DateAdded = DateTime.UtcNow;
+            DateAdded = DateTime.Now;
         }
     }
 }

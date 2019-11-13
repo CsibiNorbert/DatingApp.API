@@ -1,4 +1,5 @@
-﻿using DatingApp.API.Models;
+﻿using DatingApp.API.Helpers;
+using DatingApp.API.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace DatingApp.API.Data
         void Delete<T>(T entity) where T : class;
         // When we save changes we send a boolean
         Task<bool> SaveAll();
-        Task<IEnumerable<User>> GetUsers();
+        Task<PagedList<User>> GetUsers(UserParams userParams);
         Task<User> GetUser(int id);
         Task<Photo> GetPhoto(int id);
         Task<Photo> GetMainPhoto(int userId);
