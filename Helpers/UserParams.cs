@@ -9,5 +9,10 @@
             set { pageSize = (value > MaxPageSize) ? MaxPageSize : value; }
         }
         public int PageNumber { get; set; } = 1;
+
+        // Criteria for filtering
+        // Filtering out the currently logged in user and Gender
+        public int UserId { get; set; }
+        public string Gender { get; set; }
     }
 }
