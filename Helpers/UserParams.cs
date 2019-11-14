@@ -16,6 +16,7 @@
         public string Gender { get; set; }
         public int MinAge { get; set; } = 18;
         public int Maxage { get; set; } = 99;
-
+        // This is for last active
+        public string OrderBy { get; set; }
     }
 }
