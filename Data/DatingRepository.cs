@@ -58,6 +58,15 @@ namespace DatingApp.API.Data
             // This filters out genders
             users = users.Where(u => u.Gender == userParams.Gender);
 
+            // Min & Max age in the query parameteres
+            if (userParams.MinAge != 18 || userParams.Maxage != 99)
+            {
+                var minDob = DateTime.Today.AddYears(-userParams.Maxage - 1);
+                var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
+
+                users = users.Where(u => u.DateOfBirth >= minDob && u.DateOfBirth <= maxDob);
+            }
+
             // We return a page list of users, but before we do, we create it first
             return await PagedList<User>.CreateAsync(users,userParams.PageNumber, userParams.PageSize);
         }
