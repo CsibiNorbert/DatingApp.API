@@ -58,7 +58,7 @@ namespace DatingApp.API.Data
             // This filters out genders
             users = users.Where(u => u.Gender == userParams.Gender);
 
-            // Min & Max age in the query parameteres
+            // Min & Max age in the query parameters
             if (userParams.MinAge != 18 || userParams.Maxage != 99)
             {
                 var minDob = DateTime.Today.AddYears(-userParams.Maxage - 1);
