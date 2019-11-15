@@ -18,5 +18,7 @@
         public int Maxage { get; set; } = 99;
         // This is for last active
         public string OrderBy { get; set; }
+        public bool Likees { get; set; } = false;
+        public bool Likers { get; set; } = false;
     }
 }

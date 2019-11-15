@@ -65,6 +65,20 @@ namespace DatingApp.API.Data
             // This filters out genders
             users = users.Where(u => u.Gender == userParams.Gender);
 
+            if (userParams.Likers)
+            {
+                // get list of ids that the user has liked
+                var userLikers = await GetUserLikes(userParams.UserId, userParams.Likers);
+                // matches any of the user ids in the users table, then we return this
+                users = users.Where(u => userLikers.Contains(u.Id));
+            }
+            else
+            {
+                var userLikees = await GetUserLikes(userParams.UserId, userParams.Likers);
+                // matches any of the user ids in the users table, then we return this
+                users = users.Where(u => userLikees.Contains(u.Id));
+            }
+
             // Min & Max age in the query parameters
             if (userParams.MinAge != 18 || userParams.Maxage != 99)
             {
@@ -95,6 +109,25 @@ namespace DatingApp.API.Data
         {
             // if this return more than 0 we return true
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        private async Task<IEnumerable<int>> GetUserLikes (int id, bool likers)
+        {
+            var user = await _context
+                .Users.Include(x => x.Likers)
+                .Include(x => x.Likees)
+                .FirstOrDefaultAsync(u=>u.Id == id);
+
+            if (likers)
+            {
+                // This will return the likers of the currently logged in user
+                return user.Likers.Where(u => u.LikeeId == id).Select(i => i.LikerId);
+            }
+            else
+            {
+                return user.Likees.Where(u => u.LikerId == id).Select(i => i.LikeeId);
+            }
+
         }
     }
 }
