@@ -72,7 +72,7 @@ namespace DatingApp.API.Data
                 // matches any of the user ids in the users table, then we return this
                 users = users.Where(u => userLikers.Contains(u.Id));
             }
-            else
+            if (userParams.Likees)
             {
                 var userLikees = await GetUserLikes(userParams.UserId, userParams.Likers);
                 // matches any of the user ids in the users table, then we return this
