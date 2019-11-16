@@ -45,6 +45,27 @@ namespace DatingApp.API.Controllers
 
             return Ok(messageFromRepo);
         }
+        // This is not conflicting with the HttpGet for a sp[ecific message.
+        // This will get a list of messages
+        [HttpGet]
+        public async Task<IActionResult> GetMessagesForUser(int userId, [FromQuery] MessageParams messageParams)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            messageParams.UserId = userId;
+
+            var messagesFromrepo = await _datingrepo.GetMessagesForUser(messageParams);
+
+            var messages = _mapper.Map<IEnumerable<MessageToReturnDto>>(messagesFromrepo);
+
+            Response.AddPagination(messagesFromrepo.CurrentPage, messagesFromrepo.PageSize, messagesFromrepo.TotalCount, messagesFromrepo.TotalPages);
+
+            return Ok(messages);
+        }
+
         // This is using the route of our controller
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int userId, MessageForCreationDto messageForCreationDto)
