@@ -114,5 +114,42 @@ namespace DatingApp.API.Controllers
 
             throw new Exception("Creating the message failed on save");
         }
+
+        // We don`t want to put an HttpDelete, because we want the message to be deleted only if both sides delete the message
+        [HttpPost("{messageId}")]
+        public async Task<IActionResult> DeleteMessage(int messageId, int userId)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            var messageFromRepo = await _datingrepo.GetMessage(messageId);
+
+            // Check is the message id has the logged in user id and delete it
+            if (messageFromRepo.SenderId == userId)
+            {
+                messageFromRepo.SenderDeleted = true;
+            }
+
+            if (messageFromRepo.RecipientId == userId)
+            {
+                messageFromRepo.RecipientDeleted = true;
+            }
+
+            // Delete completely the message if both sides have deleted the message on their side
+            if (messageFromRepo.RecipientDeleted && messageFromRepo.RecipientDeleted)
+            {
+                _datingrepo.Delete(messageFromRepo);
+            }
+
+            if (await _datingrepo.SaveAll())
+            {
+                // Dont return anything to the person which is deleting this message
+                return NoContent();
+            }
+
+            throw new Exception("Error deleting the message");
+        }
     }
 }
