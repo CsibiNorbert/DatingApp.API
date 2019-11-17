@@ -151,5 +151,28 @@ namespace DatingApp.API.Controllers
 
             throw new Exception("Error deleting the message");
         }
+
+        [HttpPost("{messageId}/read")]
+        public async Task<IActionResult> MarkMessageAsRead(int userId, int messageId)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+
+            var message = await _datingrepo.GetMessage(messageId);
+
+            if (message.RecipientId != userId)
+            {
+                return Unauthorized();
+            }
+
+            message.IsRead = true;
+            message.DateRead = DateTime.Now;
+
+            await _datingrepo.SaveAll();
+
+            return NoContent();
+        }
     }
 }
