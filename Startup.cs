@@ -34,12 +34,29 @@ namespace DatingApp.API
 
         public IConfiguration Configuration { get; }
 
+        // This tun in Development mode
+        public void ConfigureDevelopmentServices(IServiceCollection services)
+        {
+
+            // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
+            services.AddDbContext<DataContext>(c => c.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+
+            ConfigureServices(services);
+        }
+
+        public void ConfigureProductionServices(IServiceCollection services)
+        {
+
+            // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
+            services.AddDbContext<DataContext>(c => c.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            ConfigureServices(services);
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // Inject services in other parts of the app. Dependency Injection
         public void ConfigureServices(IServiceCollection services)
         {
-            // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
-            services.AddDbContext<DataContext>(c => c.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(opt =>{
                 // This will ignore self referencing problems
@@ -119,8 +136,18 @@ namespace DatingApp.API
             app.UseCors(x=>x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
+            app.UseDefaultFiles(); // it will look for something called index.html inside our content root path
+            app.UseStaticFiles(); // support for using static files from the SPA in wwwroot folder.
 
-            app.UseMvc();
+            // MVC middlewear. It will tell to our API  if it doesn`t find the route for one of our controller end points,
+            // The use the controller as a fallback and use that particullar action to serve our index page
+            // Always fall back to this index and angular is taking care of our routing
+            app.UseMvc(routes => {
+                routes.MapSpaFallbackRoute(
+                    name: "spa-fallback",
+                    defaults: new { controller = "Fallback", action = "Index" }
+                    );
+            });
         }
     }
 }
