@@ -39,7 +39,10 @@ namespace DatingApp.API
         {
 
             // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
-            services.AddDbContext<DataContext>(c => c.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<DataContext>(c => {
+                c.UseLazyLoadingProxies();
+                c.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             ConfigureServices(services);
         }
@@ -48,7 +51,10 @@ namespace DatingApp.API
         {
 
             // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
-            services.AddDbContext<DataContext>(c => c.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<DataContext>(c => {
+                c.UseLazyLoadingProxies();
+                c.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                });
 
             ConfigureServices(services);
         }
