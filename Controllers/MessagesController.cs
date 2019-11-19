@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -28,7 +27,7 @@ namespace DatingApp.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{messageId}", Name ="GetMessage")]
+        [HttpGet("{messageId}", Name = "GetMessage")]
         public async Task<IActionResult> GetMessage(int userId, int messageId)
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
@@ -45,6 +44,7 @@ namespace DatingApp.API.Controllers
 
             return Ok(messageFromRepo);
         }
+
         // This is not conflicting with the HttpGet for a sp[ecific message.
         // This will get a list of messages
         [HttpGet]
@@ -67,7 +67,7 @@ namespace DatingApp.API.Controllers
         }
 
         [HttpGet("thread/{recipientId}")]
-        public async Task<IActionResult> GetMessageThread(int userId,int recipientId)
+        public async Task<IActionResult> GetMessageThread(int userId, int recipientId)
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {

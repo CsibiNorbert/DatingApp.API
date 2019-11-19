@@ -23,7 +23,6 @@ namespace DatingApp.API
                 // If we are messing with the migrations/Database, we can drop the DB and start the app again
                 try
                 {
-                    
                     var context = services.GetRequiredService<DataContext>();
 
                     // This will apply pending migrations and also will create the DB if it is not exist

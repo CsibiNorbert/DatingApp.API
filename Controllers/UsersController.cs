@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -49,7 +48,7 @@ namespace DatingApp.API.Controllers
             var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
 
             // We pass this information back in the header
-            Response.AddPagination(users.CurrentPage,users.PageSize,users.TotalCount,users.TotalPages);
+            Response.AddPagination(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
 
             return Ok(usersToReturn);
         }
@@ -81,7 +80,7 @@ namespace DatingApp.API.Controllers
 
             // Map user with Dto
             // It will take dto => user
-            _mapper.Map(userForUpdateDto,userFromRepo);
+            _mapper.Map(userForUpdateDto, userFromRepo);
 
             if (await _datingrepo.SaveAll())
             {

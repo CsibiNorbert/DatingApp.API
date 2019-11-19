@@ -1,17 +1,16 @@
 ﻿using DatingApp.API.Data;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DatingApp.API.Helpers
 {
     public class LogUserActivity : IAsyncActionFilter
     {
         /* In order to use this class, we need to add it to the startup class. */
+
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             // we are waiting until the action has been completed.

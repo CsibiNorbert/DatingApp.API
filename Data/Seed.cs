@@ -1,9 +1,7 @@
 ﻿using DatingApp.API.Models;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DatingApp.API.Data
 {
@@ -25,7 +23,7 @@ namespace DatingApp.API.Data
                 {
                     byte[] passwordHash, passwordSalt;
 
-                    CreatePasswordHash("password",out passwordHash,out passwordSalt);
+                    CreatePasswordHash("password", out passwordHash, out passwordSalt);
 
                     user.HashPassword = passwordHash;
                     user.SaltPassword = passwordSalt;
@@ -36,6 +34,7 @@ namespace DatingApp.API.Data
                 context.SaveChanges();
             }
         }
+
         // This is created here to seed the database with hashed password
         private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {

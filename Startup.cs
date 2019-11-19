@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using DatingApp.API.Data;
 using DatingApp.API.Helpers;
 using DatingApp.API.Helpers.CloudinarySettings;
@@ -13,14 +7,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
+using System.Text;
 
 namespace DatingApp.API
 {
@@ -37,9 +30,9 @@ namespace DatingApp.API
         // This tun in Development mode
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-
             // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
-            services.AddDbContext<DataContext>(c => {
+            services.AddDbContext<DataContext>(c =>
+            {
                 c.UseLazyLoadingProxies();
                 c.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
@@ -49,12 +42,12 @@ namespace DatingApp.API
 
         public void ConfigureProductionServices(IServiceCollection services)
         {
-
             // inject the dbcontext with SQLite core. Download nuget for sqlite & add a section in appsetings.json with the connection string and specify here
-            services.AddDbContext<DataContext>(c => {
+            services.AddDbContext<DataContext>(c =>
+            {
                 c.UseLazyLoadingProxies();
                 c.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
-                });
+            });
 
             ConfigureServices(services);
         }
@@ -63,15 +56,15 @@ namespace DatingApp.API
         // Inject services in other parts of the app. Dependency Injection
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(opt =>{
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(opt =>
+            {
                 // This will ignore self referencing problems
                 opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
             // Injecting the AuthRepo so that we can use it in the controllers
             services.AddScoped<IAuthRepository, AuthRepository>();
-            services.AddScoped<IDatingRepository,DatingRepository>();
+            services.AddScoped<IDatingRepository, DatingRepository>();
 
             // Add CORS service.
             services.AddCors();
@@ -112,7 +105,8 @@ namespace DatingApp.API
                 // Adds a middleware for the exception handler
                 // Context relates to our http request/response
                 // This doesn`t require a try/catch block
-                app.UseExceptionHandler(builder => {
+                app.UseExceptionHandler(builder =>
+                {
                     builder.Run(async context =>
                     {
                         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -132,14 +126,14 @@ namespace DatingApp.API
                 });
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 // Security header. Use HTTPS if available.
-                // app.UseHsts();
+                app.UseHsts();
             }
 
-            // app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             // Configure the middlewear for CORS
             // Allow credentials will fix the uploader issue, but this means that we send cookies without request
-            app.UseCors(x=>x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseDefaultFiles(); // it will look for something called index.html inside our content root path
@@ -148,7 +142,8 @@ namespace DatingApp.API
             // MVC middlewear. It will tell to our API  if it doesn`t find the route for one of our controller end points,
             // The use the controller as a fallback and use that particullar action to serve our index page
             // Always fall back to this index and angular is taking care of our routing
-            app.UseMvc(routes => {
+            app.UseMvc(routes =>
+            {
                 routes.MapSpaFallbackRoute(
                     name: "spa-fallback",
                     defaults: new { controller = "Fallback", action = "Index" }

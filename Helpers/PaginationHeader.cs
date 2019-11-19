@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace DatingApp.API.Helpers
+﻿namespace DatingApp.API.Helpers
 {
     public class PaginationHeader
     {
         // This is the information that we pass in the HTTP response header
         // This is referenced in the Extensions class
         public int CurrentPage { get; set; }
+
         public int TotalItems { get; set; }
         public int ItemsPerPage { get; set; }
         public int TotalPages { get; set; }

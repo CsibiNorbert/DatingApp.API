@@ -8,8 +8,6 @@ using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -19,18 +17,19 @@ namespace DatingApp.API.Controllers
     [Authorize]
     [Route("api/users/{userId}/photos")]
     [ApiController] // This validates the model state error, returning 400 bad request
-    public class PhotosController: ControllerBase
+    public class PhotosController : ControllerBase
     {
         private readonly IDatingRepository _daringRepo;
         private readonly IMapper _mapper;
         private readonly IOptions<CloudinarySettings> _cloudinaryConfig;
         private Cloudinary _cloudinary;
 
-        /* We use IOptions because we want to retrieve data for claudinary 
+        /* We use IOptions because we want to retrieve data for claudinary
            which are added as a service in the startup */
+
         public PhotosController(
-            IDatingRepository daringRepo, 
-            IMapper mapper, 
+            IDatingRepository daringRepo,
+            IMapper mapper,
             IOptions<CloudinarySettings> cloudinaryConfig)
         {
             _daringRepo = daringRepo;
@@ -46,6 +45,7 @@ namespace DatingApp.API.Controllers
 
             _cloudinary = new Cloudinary(acc);
         }
+
         // In http get is the id of the photo
         // The name is used for returning created at route, hence the dto for photo only
         [HttpGet("{id}", Name = "GetPhoto")]
@@ -83,7 +83,8 @@ namespace DatingApp.API.Controllers
                 // openreadstream reads our file into the memory
                 using (var stream = file.OpenReadStream())
                 {
-                    var uploadParams = new ImageUploadParams() {
+                    var uploadParams = new ImageUploadParams()
+                    {
                         File = new FileDescription(file.FileName, stream),
                         Transformation = new Transformation().Width(500).Height(500).Crop("fill").Gravity("face")
                     };
@@ -103,7 +104,7 @@ namespace DatingApp.API.Controllers
             var photo = _mapper.Map<Photo>(photoForCreationDto);
 
             // if this returns false, it means that the user doesn`t have a main photo
-            if (!userFromRepo.Photos.Any(u=>u.IsMain))
+            if (!userFromRepo.Photos.Any(u => u.IsMain))
             {
                 photo.IsMain = true;
             }
@@ -117,7 +118,7 @@ namespace DatingApp.API.Controllers
 
                 // For http post we shouldn`t return ok, instead we should return a createdatroute
                 // We need to provide a resource that we just created
-                return CreatedAtRoute("GetPhoto", new { id = photo.Id}, returnPhoto );
+                return CreatedAtRoute("GetPhoto", new { id = photo.Id }, returnPhoto);
             }
 
             return BadRequest("Could not upload the photo");

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using DatingApp.API.Helpers;
+using DatingApp.API.Models;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DatingApp.API.Helpers;
-using DatingApp.API.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.API.Data
 {
@@ -16,6 +16,7 @@ namespace DatingApp.API.Data
         {
             _context = context;
         }
+
         // We don`t use async because we don`t querying the context
         // This is saved in memory until we actually save changes
         public void Add<T>(T entity) where T : class
@@ -38,13 +39,16 @@ namespace DatingApp.API.Data
         public async Task<Photo> GetMainPhoto(int userId)
         {
             // For X user get main photo
-            return await _context.Photos.Where(u => u.UserId == userId).FirstOrDefaultAsync(p=>p.IsMain);
+            return await _context.Photos.Where(u => u.UserId == userId).FirstOrDefaultAsync(p => p.IsMain);
         }
 
-        public async Task<Message> GetMessage(int messageId) {
-            return await _context.Messages.FirstOrDefaultAsync(m=>m.Id == messageId);
+        public async Task<Message> GetMessage(int messageId)
+        {
+            return await _context.Messages.FirstOrDefaultAsync(m => m.Id == messageId);
         }
-        public async Task<PagedList<Message>> GetMessagesForUser(MessageParams messageParams) {
+
+        public async Task<PagedList<Message>> GetMessagesForUser(MessageParams messageParams)
+        {
             // Include the sender to see who messaged us + include photos to see their photos
             var messages = _context.Messages
                 .AsQueryable(); // asQueryable because we use the where clause
@@ -54,9 +58,11 @@ namespace DatingApp.API.Data
                 case "Inbox":
                     messages = messages.Where(u => u.RecipientId == messageParams.UserId && u.RecipientDeleted == false);
                     break;
+
                 case "Outbox":
                     messages = messages.Where(u => u.SenderId == messageParams.UserId && u.SenderDeleted == false);
                     break;
+
                 default:
                     messages = messages.Where(u => u.RecipientId == messageParams.UserId && u.RecipientDeleted == false && u.IsRead == false);
                     break;
@@ -67,18 +73,21 @@ namespace DatingApp.API.Data
 
             return await PagedList<Message>.CreateAsync(messages, messageParams.PageNumber, messageParams.PageSize);
         }
-        public async Task<IEnumerable<Message>> GetMessageThread(int userId, int recipientId) {
+
+        public async Task<IEnumerable<Message>> GetMessageThread(int userId, int recipientId)
+        {
             // Get full conversation between two users. Returning IEnumerable
-            var messages =await  _context.Messages
-                .Where(m => m.RecipientId == userId && m.RecipientDeleted == false && m.SenderId == recipientId 
+            var messages = await _context.Messages
+                .Where(m => m.RecipientId == userId && m.RecipientDeleted == false && m.SenderId == recipientId
                     || m.RecipientId == recipientId && m.SenderId == userId && m.SenderDeleted == false)
                 .OrderByDescending(m => m.MessageSent).ToListAsync();
 
             return messages;
         }
+
         public async Task<Photo> GetPhoto(int id)
         {
-            var photo = await _context.Photos.FirstOrDefaultAsync(p=>p.Id == id);
+            var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
 
             return photo;
         }
@@ -131,13 +140,14 @@ namespace DatingApp.API.Data
                     case "created":
                         users = users.OrderByDescending(u => u.CreatedProfile);
                         break;
+
                     default:
                         users = users.OrderByDescending(u => u.LastActive);
                         break;
                 }
             }
             // We return a page list of users, but before we do, we create it first
-            return await PagedList<User>.CreateAsync(users,userParams.PageNumber, userParams.PageSize);
+            return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<bool> SaveAll()
@@ -146,10 +156,10 @@ namespace DatingApp.API.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
-        private async Task<IEnumerable<int>> GetUserLikes (int id, bool likers)
+        private async Task<IEnumerable<int>> GetUserLikes(int id, bool likers)
         {
             var user = await _context
-                .Users.FirstOrDefaultAsync(u=>u.Id == id);
+                .Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (likers)
             {
@@ -160,7 +170,6 @@ namespace DatingApp.API.Data
             {
                 return user.Likees.Where(u => u.LikerId == id).Select(i => i.LikeeId);
             }
-
         }
     }
 }

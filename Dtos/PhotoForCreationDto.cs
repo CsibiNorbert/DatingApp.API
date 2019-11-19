@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DatingApp.API.Dtos
 {
@@ -12,8 +9,10 @@ namespace DatingApp.API.Dtos
 
         // This is the photo uploaded
         public IFormFile File { get; set; }
+
         public string Description { get; set; }
         public DateTime DateAdded { get; set; }
+
         // This is coming back rom cloudinary
         public string PublicPhotoId { get; set; }
 

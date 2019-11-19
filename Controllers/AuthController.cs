@@ -1,17 +1,15 @@
-﻿using DatingApp.API.Data;
-using DatingApp.API.Models;
+﻿using AutoMapper;
+using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
-using AutoMapper;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace DatingApp.API.Controllers
 {
@@ -34,7 +32,6 @@ namespace DatingApp.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserToBeRegisteredDto userToBeRegistered)
         {
-
             userToBeRegistered.Username = userToBeRegistered.Username.ToLower();
 
             if (await _authRepository.UserExists(userToBeRegistered.Username))
@@ -50,7 +47,7 @@ namespace DatingApp.API.Controllers
 
             // This GetUser is the name of the route in the user controller
             // The location in the headers points now to this API
-            return CreatedAtRoute("GetUser", new { controller = "Users", id = createdUser.Id}, userToReturn);
+            return CreatedAtRoute("GetUser", new { controller = "Users", id = createdUser.Id }, userToReturn);
         }
 
         [HttpPost("login")]
@@ -66,7 +63,8 @@ namespace DatingApp.API.Controllers
             }
 
             #region Build Token
-            var claims = new []
+
+            var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier,userFromRepo.Id.ToString()),
                 new Claim(ClaimTypes.Name,userFromRepo.Username)
@@ -92,7 +90,8 @@ namespace DatingApp.API.Controllers
             var tokenhandler = new JwtSecurityTokenHandler();
 
             var token = tokenhandler.CreateToken(tokenDescriptor);
-            #endregion
+
+            #endregion Build Token
 
             // This is used to retrieve the main photo, we mapp to UserForListDto
             var user = _mapper.Map<UserForListDto>(userFromRepo);

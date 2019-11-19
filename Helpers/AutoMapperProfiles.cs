@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
 using DatingApp.API.Dtos;
 using DatingApp.API.Models;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace DatingApp.API.Helpers
 {
@@ -15,8 +12,8 @@ namespace DatingApp.API.Helpers
             // Here we specify the source & destination mappings
             // Automapper is convention based maps 1-1, there is no need for configuration
             CreateMap<User, UserForListDto>()
-                .ForMember(dest => dest.PhotoUrl, opt => 
-                opt.MapFrom(source => source.Photos.FirstOrDefault(p=>p.IsMain).Url))
+                .ForMember(dest => dest.PhotoUrl, opt =>
+                opt.MapFrom(source => source.Photos.FirstOrDefault(p => p.IsMain).Url))
                 .ForMember(dest => dest.Age, opt => opt.MapFrom(src => src.DateOfBirth.CalculateAge()));
 
             CreateMap<User, UserForDetailedDto>()
