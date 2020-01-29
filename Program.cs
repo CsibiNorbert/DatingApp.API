@@ -25,7 +25,7 @@ namespace DatingApp.API
                 {
                     var context = services.GetRequiredService<DataContext>();
 
-                    // This will apply pending migrations and also will create the DB if it is not exist
+                    // This will apply pending migrations and also will create the DB if it does not exist
                     context.Database.Migrate();
 
                     Seed.SeedUsers(context);
