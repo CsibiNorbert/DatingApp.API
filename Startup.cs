@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Text;
 
@@ -56,12 +57,15 @@ namespace DatingApp.API
         // Inject services in other parts of the app. Dependency Injection
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2).AddJsonOptions(opt =>
-            {
-                // This will ignore self referencing problems
-                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });
+            // This is for web API controllers. v3.0+
+            services.AddControllers() 
+                    .AddNewtonsoftJson(opt => 
+                    {
+                        opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    });
 
+
+            
             // Injecting the AuthRepo so that we can use it in the controllers
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDatingRepository, DatingRepository>();
@@ -94,7 +98,7 @@ namespace DatingApp.API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         // Add middleware to do something with the request
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -131,24 +135,42 @@ namespace DatingApp.API
 
             app.UseHttpsRedirection();
 
+            app.UseRouting(); // v3.0+ Adding routing middleware to our pipeline
+            app.UseAuthentication();
+            app.UseAuthorization(); // v3.0 This is in the template by default and it needs to be added
+           
+
             // Configure the middlewear for CORS
             // Allow credentials will fix the uploader issue, but this means that we send cookies without request
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-            app.UseAuthentication();
             app.UseDefaultFiles(); // it will look for something called index.html inside our content root path
             app.UseStaticFiles(); // support for using static files from the SPA in wwwroot folder.
+
+
+
+            // We use a web api project and we need to use this instead of MVC below
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+
+                // this is for the publishing, for the fallback controller if there is any.
+                // endpoints.MapFallbackToController("Index", "Fallback");
+            });
+
+
 
             // MVC middlewear. It will tell to our API  if it doesn`t find the route for one of our controller end points,
             // The use the controller as a fallback and use that particullar action to serve our index page
             // Always fall back to this index and angular is taking care of our routing
-            app.UseMvc(routes =>
-            {
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Fallback", action = "Index" }
-                    );
-            });
+
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapSpaFallbackRoute(
+            //        name: "spa-fallback",
+            //        defaults: new { controller = "Fallback", action = "Index" }
+            //        );
+            //});
         }
     }
 }

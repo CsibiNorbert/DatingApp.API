@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
 
 namespace DatingApp.API
 {
@@ -12,7 +13,7 @@ namespace DatingApp.API
         public static void Main(string[] args)
         {
             // The host will Run after we have seeded our data
-            var host = CreateWebHostBuilder(args).Build();
+            var host = CreateHostBuilder(args).Build();
 
             // We create the scope because we cannot inject the context
             using (var scope = host.Services.CreateScope())
@@ -39,12 +40,12 @@ namespace DatingApp.API
                 }
             }
 
-            // Now we can RUN it. In the beggining we were running it in the main method, in the hostbuilder
+            // Now we can RUN it. In the begging we were running it in the main method, in the hostbuilder
             host.Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                
     }
 }

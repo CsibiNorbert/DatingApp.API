@@ -118,7 +118,8 @@ namespace DatingApp.API.Controllers
 
                 // For http post we shouldn`t return ok, instead we should return a createdatroute
                 // We need to provide a resource that we just created
-                return CreatedAtRoute("GetPhoto", new { id = photo.Id }, returnPhoto);
+                // We specify the userId here because in v3.0+, on the controller level we have a user id parameter which needs to be passed as well.
+                return CreatedAtRoute("GetPhoto", new { userId, id = photo.Id }, returnPhoto);
             }
 
             return BadRequest("Could not upload the photo");
