@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DatingApp.API.Models
 {
-    public class User
+    // Userid is using int Type, it will force to use the int as and id
+    public class User : IdentityUser<int>
     {
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public byte[] HashPassword { get; set; }
-        public byte[] SaltPassword { get; set; }
         public string Gender { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string KnownAs { get; set; }
@@ -27,5 +25,6 @@ namespace DatingApp.API.Models
         public virtual ICollection<Like> Likees { get; set; }
         public virtual ICollection<Message> MessagesSent { get; set; }
         public virtual ICollection<Message> MessagesReceived { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; }
     }
 }

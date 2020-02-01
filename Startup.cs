@@ -15,6 +15,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Hosting;
 using System.Net;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+using DatingApp.API.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace DatingApp.API
 {
@@ -57,8 +61,42 @@ namespace DatingApp.API
         // Inject services in other parts of the app. Dependency Injection
         public void ConfigureServices(IServiceCollection services)
         {
+            IdentityBuilder builder = services.AddIdentityCore<User>(opt =>
+            {
+                // This is should not be used in prod, this is used in dev mode
+                opt.Password.RequireDigit = false;
+                opt.Password.RequiredLength = 4;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
+            });
+            // Configuration for identity
+            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
+            // this will allow to add and create users
+            builder.AddEntityFrameworkStores<DataContext>();
+            // Implementing roles
+            builder.AddRoleValidator<RoleValidator<Role>>();
+            builder.AddRoleManager<RoleManager<Role>>();
+            builder.AddSignInManager<SignInManager<User>>();
+
+            // Add token scheme
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
+                    ValidateIssuer = false, // this is localhost
+                    ValidateAudience = false // localhost
+                };
+            });
+
             // This is for web API controllers. v3.0+
-            services.AddControllers() 
+            // Authorize attribute can be removed from controllers
+            services.AddControllers(opt => {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            }) 
                     .AddNewtonsoftJson(opt => 
                     {
                         opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -83,17 +121,7 @@ namespace DatingApp.API
 
             // we need to give an assembly to where to look in
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
-            // Add token scheme
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings:Token").Value)),
-                    ValidateIssuer = false, // this is localhost
-                    ValidateAudience = false // localhost
-                };
-            });
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -155,7 +183,7 @@ namespace DatingApp.API
                 endpoints.MapControllers();
 
                 // this is for the publishing, for the fallback controller if there is any.
-                // endpoints.MapFallbackToController("Index", "Fallback");
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
 
 

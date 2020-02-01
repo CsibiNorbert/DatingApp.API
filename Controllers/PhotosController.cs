@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace DatingApp.API.Controllers
 {
-    [Authorize]
     [Route("api/users/{userId}/photos")]
     [ApiController] // This validates the model state error, returning 400 bad request
     public class PhotosController : ControllerBase
