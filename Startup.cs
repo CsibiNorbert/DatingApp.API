@@ -90,6 +90,13 @@ namespace DatingApp.API
                 };
             });
 
+            // Use the policy to protect the endpoints
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("RequireModeratorRole", policy => policy.RequireRole("Admin","Moderator"));
+                options.AddPolicy("RequireVipRole", policy => policy.RequireRole("VIP"));
+            });
             // This is for web API controllers. v3.0+
             // Authorize attribute can be removed from controllers
             services.AddControllers(opt => {
