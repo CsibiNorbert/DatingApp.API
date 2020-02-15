@@ -10,7 +10,7 @@ namespace DatingApp.API.Data
     {
         // The method is static because we use the method without instanciating the class
         // We don`t use async because this method is being called when our application very first starts up ( called once )
-        public static void SeedUsers(UserManager<User> userManager)
+        public static void SeedUsers(UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             // Check if we have any users in our DB
             if (!userManager.Users.Any())
@@ -19,6 +19,20 @@ namespace DatingApp.API.Data
 
                 // convert the Data to user objects
                 var users = JsonConvert.DeserializeObject<List<User>>(userData);
+
+                // create roles
+                var roles = new List<Role>
+                {
+                    new Role{ Name="Member"},
+                    new Role{ Name="Admin"},
+                    new Role{ Name="Moderator"},
+                    new Role{ Name="VIP"},
+                };
+
+                foreach (var role in roles)
+                {
+                    roleManager.CreateAsync(role).Wait();
+                }
 
                 foreach (var user in users)
                 {
@@ -34,6 +48,22 @@ namespace DatingApp.API.Data
                     // Password is being passed for everyone the same, for simplicty
                     // We use wait to wait for the create method because we are not in an async method
                     userManager.CreateAsync(user, "password").Wait();
+                    userManager.AddToRoleAsync(user, "Member");
+                }
+
+                // Create admin user
+
+                var adminUser = new User
+                {
+                    UserName = "Admin"
+                };
+
+                var result = userManager.CreateAsync(adminUser, "password").Result;
+
+                if (result.Succeeded)
+                {
+                    var admin = userManager.FindByNameAsync("Admin").Result;
+                    userManager.AddToRolesAsync(admin, new[] { "Admin", "Moderator" });
                 }
             }
         }

@@ -28,10 +28,12 @@ namespace DatingApp.API
                 {
                     var context = services.GetRequiredService<DataContext>();
                     var userManager = services.GetRequiredService<UserManager<User>>();
+                    var roleManager = services.GetRequiredService<RoleManager<Role>>();
+
                     // This will apply pending migrations and also will create the DB if it does not exist
                     context.Database.Migrate();
 
-                    Seed.SeedUsers(userManager);
+                    Seed.SeedUsers(userManager,roleManager);
                 }
                 catch (System.Exception ex)
                 {
