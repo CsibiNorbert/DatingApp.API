@@ -78,7 +78,7 @@ namespace DatingApp.API.Controllers
                 return Ok(
                     new
                     {
-                        token = GenerateJwtToken(user),
+                        token = GenerateJwtToken(user).Result,
                         user = appUser // this is what we return, so that we dont return the excesive information
                     });
             }
