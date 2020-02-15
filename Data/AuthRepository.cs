@@ -17,17 +17,19 @@ namespace DatingApp.API.Data
         {
             // If we want to retrieve photos from users, we need to specify in the include
             // will return the Collection of photos
-            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.Include(p => p.Photos).FirstOrDefaultAsync(u => u.UserName == username);
 
             if (user == null)
             {
                 return null;
             }
 
-            if (!VerifyHashPassword(password, user.HashPassword, user.SaltPassword))
-            {
-                return null;
-            }
+            //if (!VerifyHashPassword(password, user.PasswordHash, user.SaltPassword))
+            //{
+            //    return null;
+            //}
+
+
 
             return user;
         }
@@ -39,8 +41,8 @@ namespace DatingApp.API.Data
 
             CreateHashSaltPassword(password, out passwordHash, out passwordSalt);
 
-            user.HashPassword = passwordHash;
-            user.SaltPassword = passwordSalt;
+            //user.HashPassword = passwordHash;
+            //user.SaltPassword = passwordSalt;
 
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -50,7 +52,7 @@ namespace DatingApp.API.Data
 
         public async Task<bool> UserExists(string username)
         {
-            if (await _context.Users.AnyAsync(u => u.Username == username))
+            if (await _context.Users.AnyAsync(u => u.UserName == username))
             {
                 return true;
             }

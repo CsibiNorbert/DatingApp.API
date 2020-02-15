@@ -3,6 +3,7 @@ using DatingApp.API.Data;
 using DatingApp.API.Dtos;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -22,13 +23,21 @@ namespace DatingApp.API.Controllers
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
         // Injecting the IAuthRepository to the controller.
-        public AuthController(IAuthRepository authRepository, IConfiguration configuration, IMapper mapper)
+        public AuthController(IAuthRepository authRepository,
+                              IConfiguration configuration,
+                              IMapper mapper,
+                              UserManager<User> userManager,
+                              SignInManager<User> signInManager)
         {
             _authRepository = authRepository;
             _configuration = configuration;
             _mapper = mapper;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpPost("register")]
@@ -56,20 +65,37 @@ namespace DatingApp.API.Controllers
         public async Task<IActionResult> Login(UserToLoginDto userToLoginDto)
         {
             // provide the credentials to the Login method and if user doesn`t exist, then we return null.
-            var userFromRepo = await _authRepository.Login(userToLoginDto.Username.ToLower(), userToLoginDto.Password);
+            //var userFromRepo = await _authRepository.Login(userToLoginDto.Username.ToLower(), userToLoginDto.Password);
+
+            var user = await _userManager.FindByNameAsync(userToLoginDto.Username);
+
+            // Will get the user found by the username and it will compare the password, and then we say false as we dont need to lock out our user.
+            var result = await _signInManager.CheckPasswordSignInAsync(user, userToLoginDto.Password, false);
 
             // If null return unauthorized
-            if (userFromRepo == null)
+            if (result.Succeeded)
             {
-                return Unauthorized();
+                // This is used to retrieve the main photo, we mapp to UserForListDto
+                var appUser = _mapper.Map<UserForListDto>(user);
+
+                return Ok(
+                    new
+                    {
+                        token = GenerateJwtToken(user),
+                        user = appUser // this is what we return, so that we dont return the excesive information
+                    });
             }
 
-            #region Build Token
+            return Unauthorized();            
+        }
 
+        private string GenerateJwtToken(User user)
+        {
+            #region Build Token
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier,userFromRepo.Id.ToString()),
-                new Claim(ClaimTypes.Name,userFromRepo.Username)
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim(ClaimTypes.Name,user.UserName)
             };
 
             // This is created in appsettings json
@@ -95,15 +121,7 @@ namespace DatingApp.API.Controllers
 
             #endregion Build Token
 
-            // This is used to retrieve the main photo, we mapp to UserForListDto
-            var user = _mapper.Map<UserForListDto>(userFromRepo);
-
-            return Ok(
-                new
-                {
-                    token = tokenhandler.WriteToken(token),
-                    user
-                });
+            return tokenhandler.WriteToken(token);
         }
     }
 }

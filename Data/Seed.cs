@@ -1,4 +1,5 @@
 ﻿using DatingApp.API.Models;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace DatingApp.API.Data
     {
         // The method is static because we use the method without instanciating the class
         // We don`t use async because this method is being called when our application very first starts up ( called once )
-        public static void SeedUsers(DataContext context)
+        public static void SeedUsers(UserManager<User> userManager)
         {
-            // Check if DB is empty
-            if (!context.Users.Any())
+            // Check if we have any users in our DB
+            if (!userManager.Users.Any())
             {
                 var userData = System.IO.File.ReadAllText("Data/UserSeedData.json");
 
@@ -21,17 +22,19 @@ namespace DatingApp.API.Data
 
                 foreach (var user in users)
                 {
-                    byte[] passwordHash, passwordSalt;
+                    //byte[] passwordHash, passwordSalt;
 
-                    CreatePasswordHash("password", out passwordHash, out passwordSalt);
+                    //CreatePasswordHash("password", out passwordHash, out passwordSalt);
 
-                    user.HashPassword = passwordHash;
-                    user.SaltPassword = passwordSalt;
-                    user.Username = user.Username.ToLower();
-                    context.Users.Add(user);
+                    ////user.PasswordHash = passwordHash;
+                    ////user.SaltPassword = passwordSalt;
+                    //user.UserName = user.UserName.ToLower();
+                    //context.Users.Add(user);
+
+                    // Password is being passed for everyone the same, for simplicty
+                    // We use wait to wait for the create method because we are not in an async method
+                    userManager.CreateAsync(user, "password").Wait();
                 }
-
-                context.SaveChanges();
             }
         }
 
