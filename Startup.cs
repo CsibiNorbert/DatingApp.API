@@ -105,7 +105,7 @@ namespace DatingApp.API
 
             
             // Injecting the AuthRepo so that we can use it in the controllers
-            services.AddScoped<IAuthRepository, AuthRepository>();
+            //services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDatingRepository, DatingRepository>();
 
             // Add CORS service.

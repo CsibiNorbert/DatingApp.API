@@ -20,20 +20,17 @@ namespace DatingApp.API.Controllers
     [AllowAnonymous]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
         // Injecting the IAuthRepository to the controller.
-        public AuthController(IAuthRepository authRepository,
-                              IConfiguration configuration,
+        public AuthController(IConfiguration configuration,
                               IMapper mapper,
                               UserManager<User> userManager,
                               SignInManager<User> signInManager)
         {
-            _authRepository = authRepository;
             _configuration = configuration;
             _mapper = mapper;
             _userManager = userManager;
@@ -43,22 +40,21 @@ namespace DatingApp.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserToBeRegisteredDto userToBeRegistered)
         {
-            userToBeRegistered.Username = userToBeRegistered.Username.ToLower();
-
-            if (await _authRepository.UserExists(userToBeRegistered.Username))
-            {
-                return BadRequest("Username already exists");
-            }
-
+           
             var userToCreate = _mapper.Map<User>(userToBeRegistered);
 
-            var createdUser = await _authRepository.Register(userToCreate, userToBeRegistered.Password);
+            var result = await _userManager.CreateAsync(userToCreate, userToBeRegistered.Password);
 
-            var userToReturn = _mapper.Map<UserForDetailedDto>(createdUser);
+            var userToReturn = _mapper.Map<UserForDetailedDto>(userToCreate);
 
-            // This GetUser is the name of the route in the user controller
-            // The location in the headers points now to this API
-            return CreatedAtRoute("GetUser", new { controller = "Users", id = createdUser.Id }, userToReturn);
+            if (result.Succeeded)
+            {
+                // This GetUser is the name of the route in the user controller
+                // The location in the headers points now to this API
+                return CreatedAtRoute("GetUser", new { controller = "Users", id = userToCreate.Id }, userToReturn);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpPost("login")]
