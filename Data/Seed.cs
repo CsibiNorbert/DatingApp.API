@@ -50,7 +50,7 @@ namespace DatingApp.API.Data
                     userManager.CreateAsync(user, "password").Wait();
                     userManager.AddToRoleAsync(user, "Member").Wait();
                     // By default the isApproved is false
-                    user.Photos.SingleOrDefault().isApproved = true;
+                    user.Photos.SingleOrDefault().IsApproved = true;
                 }
 
                 // Create admin user
