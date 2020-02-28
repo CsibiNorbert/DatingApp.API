@@ -48,7 +48,9 @@ namespace DatingApp.API.Data
                     // Password is being passed for everyone the same, for simplicty
                     // We use wait to wait for the create method because we are not in an async method
                     userManager.CreateAsync(user, "password").Wait();
-                    userManager.AddToRoleAsync(user, "Member");
+                    userManager.AddToRoleAsync(user, "Member").Wait();
+                    // By default the isApproved is false
+                    user.Photos.SingleOrDefault().isApproved = true;
                 }
 
                 // Create admin user
