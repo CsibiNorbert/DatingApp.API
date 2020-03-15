@@ -33,7 +33,7 @@ namespace DatingApp.API.Controllers
         {
             //Getting current user id from the token
             var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var userFromRepo = await _datingrepo.GetUser(currentUserId);
+            var userFromRepo = await _datingrepo.GetUser(currentUserId,true);
 
             userParams.UserId = userFromRepo.Id;
             if (string.IsNullOrEmpty(userParams.Gender))
@@ -55,7 +55,10 @@ namespace DatingApp.API.Controllers
         [HttpGet("{id}", Name = "GetUser")]
         public async Task<IActionResult> GetUser(int id)
         {
-            var user = await _datingrepo.GetUser(id);
+            // Compairing the name identifiar from the user`s token to the id of the route path
+            var isCurrentUser = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value) == id;
+
+            var user = await _datingrepo.GetUser(id, isCurrentUser);
 
             // Destination => user = source
             // In order this automapper to work, it needs a profile
@@ -75,7 +78,7 @@ namespace DatingApp.API.Controllers
             }
 
             // Retrieve user
-            var userFromRepo = await _datingrepo.GetUser(id);
+            var userFromRepo = await _datingrepo.GetUser(id,true);
 
             // Map user with Dto
             // It will take dto => user
@@ -107,7 +110,7 @@ namespace DatingApp.API.Controllers
                 return BadRequest("You already liked this user");
             }
 
-            if (await _datingrepo.GetUser(recipientId) == null)
+            if (await _datingrepo.GetUser(recipientId, false) == null)
             {
                 return NotFound();
             }

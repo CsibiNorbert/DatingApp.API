@@ -84,7 +84,7 @@ namespace DatingApp.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int userId, MessageForCreationDto messageForCreationDto)
         {
-            var sender = await _datingrepo.GetUser(userId);
+            var sender = await _datingrepo.GetUser(userId,false);
 
             if (sender.Id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
             {
@@ -94,7 +94,7 @@ namespace DatingApp.API.Controllers
             messageForCreationDto.SenderId = userId;
 
             // The recipientId is sent as part of the body of the request
-            var recipient = await _datingrepo.GetUser(messageForCreationDto.RecipientId);
+            var recipient = await _datingrepo.GetUser(messageForCreationDto.RecipientId,false);
 
             if (recipient == null)
             {

@@ -1,10 +1,14 @@
-﻿using DatingApp.API.Data;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using DatingApp.API.Data;
 using DatingApp.API.Dtos;
+using DatingApp.API.Helpers.CloudinarySettings;
 using DatingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +26,24 @@ namespace DatingApp.API.Controllers
     {
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IOptions<CloudinarySettings> _cloudinaryConfig;
+        private  Cloudinary _cloudinary;
 
-        public AdminController(DataContext context, UserManager<User> userManager)
+        public AdminController(DataContext context, UserManager<User> userManager, IOptions<CloudinarySettings> cloudinaryConfig)
         {
             _context = context;
             _userManager = userManager;
+            _cloudinaryConfig = cloudinaryConfig;
+
+            Account acc = new Account(
+                _cloudinaryConfig.Value.CloudName,
+                _cloudinaryConfig.Value.ApiKey,
+                _cloudinaryConfig.Value.ApiSecret
+                );
+
+            _cloudinary = new Cloudinary(acc);
         }
+
         [Authorize(Policy = "RequireAdminrole")]
         [HttpGet("usersWithRoles")]
         public async Task<IActionResult> GetUsersWithRoles()
@@ -86,9 +102,75 @@ namespace DatingApp.API.Controllers
 
         [Authorize(Policy = "RequireModeratorRole")]
         [HttpGet("photosForModeration")]
-        public IActionResult GetPhotosForModeration()
+        public async Task<IActionResult> GetPhotosForModeration()
         {
-            return Ok("Admins or moderators can see this");
+            var allPhotos = await _context.Photos
+                .Include(u => u.User)
+                .IgnoreQueryFilters()
+                .Where(p => p.IsApproved == false)
+                .Select(u => new
+                {
+                    Id = u.Id,
+                    UserName = u.User.UserName,
+                    Url = u.Url,
+                    IsApproved = u.IsApproved
+                }).ToListAsync();
+
+            return Ok(allPhotos);
+        }
+
+        [Authorize(Policy = "RequireModeratorRole")]
+        [HttpPost("approvePhoto/{photoId}")]
+        public async Task<IActionResult> ApprovePhoto(int photoId)
+        {
+            var photoToApprove = await _context.Photos
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == photoId);
+
+            photoToApprove.IsApproved = true;
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Photo has been approved!");
+        }
+
+        [Authorize(Policy = "RequireModeratorRole")]
+        [HttpPost("rejectPhoto/{photoId}")]
+        public async Task<IActionResult> RejectPhoto(int photoId)
+        {
+            var photoToReject = await _context.Photos
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.Id == photoId);
+
+            // Unnecessary check, there is no way that the user will add the photo as main if it is not approved
+            if (photoToReject.IsMain)
+            {
+                return BadRequest("Profile picture cannot be rejected");
+            }
+
+            // If it has a publicId, it means it is a cloudinary photo
+            if (photoToReject.PublicPhotoId != null)
+            {
+                // Delete the photo from cloudinary
+                var deleteParams = new DeletionParams(photoToReject.PublicPhotoId);
+
+                var result = _cloudinary.Destroy(deleteParams);
+
+                if (result.Result == "ok")
+                {
+                    _context.Photos.Remove(photoToReject);
+                }
+            }
+
+            // If it is null, don`t need to delete it from cloudinary
+            if (photoToReject.PublicPhotoId == null)
+            {
+                _context.Photos.Remove(photoToReject);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok("Photo has been rejected!");
         }
     }
 }

@@ -57,6 +57,11 @@ namespace DatingApp.API.Data
                .HasOne(m => m.Recipient)
                .WithMany(m => m.MessagesReceived)
                .OnDelete(DeleteBehavior.Restrict);
+
+            // *Global query filter that filters out everything(Photo) and send back photos that are approved
+            // *If you browse like somebody else, they cannot see them, only the current user
+            // By ignoring the query filters
+            builder.Entity<Photo>().HasQueryFilter(p => p.IsApproved);
         }
     }
 }

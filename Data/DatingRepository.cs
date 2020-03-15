@@ -87,18 +87,24 @@ namespace DatingApp.API.Data
 
         public async Task<Photo> GetPhoto(int id)
         {
-            var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
+            var photo = await _context.Photos.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Id == id);
 
             return photo;
         }
 
-        public async Task<User> GetUser(int id)
+        public async Task<User> GetUser(int id, bool isCurrentUser)
         {
-            // When retrieve the user, we retrieve his photos as well.
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            var query = _context.Users.Include(p => p.Photos).AsQueryable();
 
+            if (isCurrentUser)
+            {
+                // For current user the global filter is dissabled
+                query = query.IgnoreQueryFilters();
+            }
+
+            // When retrieve the user, we retrieve his photos as well.
             // returning default means null if the user doesn`t matches his id
-            return user;
+            return await query.FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<PagedList<User>> GetUsers(UserParams userParams)

@@ -68,7 +68,7 @@ namespace DatingApp.API.Controllers
             }
 
             // Retrieve user
-            var userFromRepo = await _daringRepo.GetUser(userId);
+            var userFromRepo = await _daringRepo.GetUser(userId, true);
 
             var file = photoForCreationDto.File;
 
@@ -133,7 +133,7 @@ namespace DatingApp.API.Controllers
                 return Unauthorized();
             }
 
-            var user = await _daringRepo.GetUser(userId);
+            var user = await _daringRepo.GetUser(userId,true);
 
             // if the Id passing in, is not matching with any of the user photo collection
             if (!user.Photos.Any(p => p.Id == id))
@@ -173,7 +173,7 @@ namespace DatingApp.API.Controllers
                 return Unauthorized();
             }
 
-            var user = await _daringRepo.GetUser(userId);
+            var user = await _daringRepo.GetUser(userId,true);
 
             // if the Id passing in, is not matching with any of the user photo collection
             if (!user.Photos.Any(p => p.Id == id))
